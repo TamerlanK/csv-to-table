@@ -28,14 +28,19 @@ function parseFileContent(content) {
   const lines = content.trim().split("\n")
 
   const persons = lines.map((line) => {
-    const values = line.split(",").map((value) => value.trim())
-    return {
-      firstName: values[0],
-      lastName: values[1],
-      email: values[2],
-      phone: values[3],
-      title: values[4],
-    }
+    const [firstName, lastName, email, phone, title] = line
+      .split(",")
+      .map((value) => value.trim())
+
+    const person = new Person()
+
+    Reflect.set(person, "firstName", firstName)
+    Reflect.set(person, "lastName", lastName)
+    Reflect.set(person, "email", email)
+    Reflect.set(person, "phone", phone)
+    Reflect.set(person, "title", title)
+
+    return person
   })
 
   createTable(persons)
@@ -48,9 +53,9 @@ function createTable(data) {
   data.forEach((person) => {
     const tr = document.createElement("tr")
     tr.classList.add("border-b", "border-gray-200", "hover:bg-gray-100")
-    ;["firstName", "lastName", "email", "phone", "title"].forEach((key) => {
+    Object.keys(new Person()).forEach((key) => {
       const td = document.createElement("td")
-      td.textContent = person[key]
+      td.textContent = Reflect.get(person, key)
       td.classList.add("py-2", "px-4")
       tr.appendChild(td)
     })
@@ -58,8 +63,7 @@ function createTable(data) {
     tableBody.appendChild(tr)
   })
 
-  const saveButton = document.getElementById("saveButton")
-  saveButton.disabled = false
+  updateButtonState()
 }
 
 document.getElementById("saveButton").addEventListener("click", saveData)
@@ -68,13 +72,15 @@ function saveData() {
   const rows = document.querySelectorAll("#tableBody tr")
   const data = Array.from(rows).map((row) => {
     const cells = row.querySelectorAll("td")
-    return {
-      firstName: cells[0].textContent,
-      lastName: cells[1].textContent,
-      email: cells[2].textContent,
-      phone: cells[3].textContent,
-      title: cells[4].textContent,
-    }
+
+    const personData = new Person()
+    Reflect.set(personData, "firstName", cells[0].textContent)
+    Reflect.set(personData, "lastName", cells[1].textContent)
+    Reflect.set(personData, "email", cells[2].textContent)
+    Reflect.set(personData, "phone", cells[3].textContent)
+    Reflect.set(personData, "title", cells[4].textContent)
+
+    return personData
   })
 
   fetch("http://localhost:3000/persons", {
@@ -99,5 +105,17 @@ document.getElementById("clearButton").addEventListener("click", clearTable)
 function clearTable() {
   document.getElementById("tableBody").innerHTML = ""
   document.getElementById("fileInput").value = ""
-  document.getElementById("saveButton").disabled = true
+
+  updateButtonState()
+}
+
+function updateButtonState() {
+  const tableBody = document.getElementById("tableBody")
+  const hasData = tableBody.rows.length > 0
+
+  const saveButton = document.getElementById("saveButton")
+  const clearButton = document.getElementById("clearButton")
+
+  saveButton.disabled = !hasData
+  clearButton.disabled = !hasData
 }
