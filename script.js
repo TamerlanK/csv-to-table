@@ -8,6 +8,11 @@ class Person {
   }
 }
 
+function isEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email)
+}
+
 document
   .getElementById("fileInput")
   .addEventListener("change", handleFileUpload)
@@ -16,9 +21,22 @@ function handleFileUpload(event) {
   const file = event.target.files[0]
   if (file) {
     const reader = new FileReader()
+
     reader.onload = function (e) {
-      const content = e.target.result
-      parseFileContent(content)
+      try {
+        const content = e.target.result
+        parseFileContent(content)
+        alert("File uploaded successfully!")
+      } catch (error) {
+        console.error("Error processing file content: ", error)
+        document.getElementById("fileError").innerText = error.message
+        clearTable()
+      }
+    }
+
+    reader.onerror = function (e) {
+      alert(`Error while reading the file`)
+      console.log(`Error: ${e}`)
     }
     reader.readAsText(file)
   }
@@ -27,18 +45,16 @@ function handleFileUpload(event) {
 function parseFileContent(content) {
   const lines = content.trim().split("\n")
 
-  const persons = lines.map((line) => {
-    const [firstName, lastName, email, phone, title] = line
-      .split(",")
-      .map((value) => value.trim())
+  const persons = lines.map((line, index) => {
+    const personData = line.split(",").map((value) => value.trim())
 
-    const person = new Person()
+    const person = Reflect.construct(Person, personData)
 
-    Reflect.set(person, "firstName", firstName)
-    Reflect.set(person, "lastName", lastName)
-    Reflect.set(person, "email", email)
-    Reflect.set(person, "phone", phone)
-    Reflect.set(person, "title", title)
+    if (!isEmail(person.email)) {
+      throw new Error(
+        `Invalid email found on line ${index + 1}: ${person.email}`
+      )
+    }
 
     return person
   })
@@ -72,15 +88,9 @@ function saveData() {
   const rows = document.querySelectorAll("#tableBody tr")
   const data = Array.from(rows).map((row) => {
     const cells = row.querySelectorAll("td")
+    const cellsData = Array.from(cells).map((cell) => cell.textContent)
 
-    const personData = new Person()
-    Reflect.set(personData, "firstName", cells[0].textContent)
-    Reflect.set(personData, "lastName", cells[1].textContent)
-    Reflect.set(personData, "email", cells[2].textContent)
-    Reflect.set(personData, "phone", cells[3].textContent)
-    Reflect.set(personData, "title", cells[4].textContent)
-
-    return personData
+    return Reflect.construct(Person, cellsData)
   })
 
   fetch("http://localhost:3000/persons", {
@@ -116,6 +126,11 @@ function updateButtonState() {
   const saveButton = document.getElementById("saveButton")
   const clearButton = document.getElementById("clearButton")
 
-  saveButton.disabled = !hasData
-  clearButton.disabled = !hasData
+  if (hasData) {
+    saveButton.classList.remove("hidden")
+    clearButton.classList.remove("hidden")
+  } else {
+    saveButton.classList.add("hidden")
+    clearButton.classList.add("hidden")
+  }
 }

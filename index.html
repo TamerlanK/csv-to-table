@@ -18,8 +18,7 @@
           />
           <button
             id="clearButton"
-            class="whitespace-nowrap py-2 px-4 bg-red-600 rounded-lg text-white font-semibold hover:bg-red-700 transition duration-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-red-600"
-            disabled
+            class="whitespace-nowrap py-2 px-4 bg-red-600 rounded-lg text-white font-semibold hover:bg-red-700 transition duration-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-red-600 hidden"
           >
             Clear Table
           </button>
@@ -29,7 +28,7 @@
           <table class="min-w-full bg-white rounded-lg shadow-md">
             <thead>
               <tr
-                id="table-header"
+                id="tableHeader"
                 class="bg-blue-500 text-white text-left divide-x"
               >
                 <th class="py-2 px-4">First Name</th>
@@ -45,11 +44,11 @@
       </div>
       <button
         id="saveButton"
-        class="py-2 px-4 mt-4 mr-6 float-right bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600"
-        disabled
+        class="py-2 px-4 mt-4 mr-6 float-right bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600 hidden"
       >
         Kaydet
       </button>
+      <div id="fileError" class="mt-2 text-red-600"></div>
     </div>
   </body>
 </html>
